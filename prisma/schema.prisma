@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id      Int      @id @default(autoincrement())
+  name    String
+  contact Int
+  role    String
+  img     String
+  admin   admin[]
+  parkat  parkat[]
+}
+
+model admin {
+  email    String @unique
+  district Int
+  user     user   @relation(fields: [userId], references: [id])
+  userId   Int    @id @default(autoincrement())
+}
+
+model parkat {
+  user   user @relation(fields: [userId], references: [id])
+  userId Int  @id @default(autoincrement())
+  zoneId Int
+}
+
+model offence {
+  offId   Int      @id @default(autoincrement())
+  offType String
+  fineAmt Int
+  report  report[]
+}
+
+model zone {
+  zoneId   Int       @id @default(autoincrement())
+  zoneName String
+  zoneImg  String
+  district district  @relation(fields: [disId], references: [districtId])
+  disId    Int
+  zonefee  zonefee[]
+}
+
+model zonefee {
+  feeId Int  @id @default(autoincrement())
+  zone  zone @relation(fields: [zoId], references: [zoneId])
+  zoId  Int
+}
+
+model district {
+  districtId Int    @id @default(autoincrement())
+  name       String
+  dzongkhag  String
+  zone       zone[]
+}
+
+model report {
+  reportId     Int      @id @default(autoincrement())
+  reportTime   DateTime
+  fineStatus   Boolean
+  zoneName     Int
+  offence      offence  @relation(fields: [offenceId], references: [offId])
+  offenceId    Int
+  parkAttendId Int
+  vehicleNo    Int
+}
+
+model payment {
+  paymentId Int    @id @default(autoincrement())
+  journalNo Int    @unique
+  accountNo Int    @unique
+  bank      String
+  amount    Int
+  vehicleNo Int
+}
