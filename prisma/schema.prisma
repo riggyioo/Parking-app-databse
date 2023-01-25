@@ -18,16 +18,18 @@ model user {
 }
 
 model admin {
-  email    String @unique
+  email    String   @unique
+  dist     district @relation(fields: [district], references: [districtId])
   district Int
-  user     user   @relation(fields: [userId], references: [id])
-  userId   Int    @id @default(autoincrement())
+  user     user     @relation(fields: [userId], references: [id])
+  userId   Int      @id @default(autoincrement())
 }
 
 model parkat {
-  user   user @relation(fields: [userId], references: [id])
-  userId Int  @id @default(autoincrement())
+  user   user     @relation(fields: [userId], references: [id])
+  userId Int      @id @default(autoincrement())
   zoneId Int
+  report report[]
 }
 
 model offence {
@@ -44,37 +46,84 @@ model zone {
   district district  @relation(fields: [disId], references: [districtId])
   disId    Int
   zonefee  zonefee[]
+  payment  payment[]
 }
 
 model zonefee {
-  feeId Int  @id @default(autoincrement())
+  fee   fee  @relation(fields: [feeId], references: [feeId])
+  feeId Int  @id
   zone  zone @relation(fields: [zoId], references: [zoneId])
   zoId  Int
 }
 
+model fee {
+  feeId   Int         @id @default(autoincrement())
+  vehicle vehicleType @relation(fields: [typeId], references: [tyId])
+  typeId  Int
+  feeAmt  Int
+  zonefee zonefee[]
+}
+
 model district {
-  districtId Int    @id @default(autoincrement())
+  districtId Int     @id @default(autoincrement())
   name       String
   dzongkhag  String
   zone       zone[]
+  admin      admin[]
 }
 
 model report {
-  reportId     Int      @id @default(autoincrement())
+  reportId     Int         @id @default(autoincrement())
   reportTime   DateTime
   fineStatus   Boolean
   zoneName     Int
-  offence      offence  @relation(fields: [offenceId], references: [offId])
+  offence      offence     @relation(fields: [offenceId], references: [offId])
   offenceId    Int
+  attendant    parkat      @relation(fields: [parkAttendId], references: [userId])
   parkAttendId Int
+  vehicle      vehicle     @relation(fields: [vehicleNo], references: [vehicleNo])
   vehicleNo    Int
+  reportImg    reportImg[]
+}
+
+model reportImg {
+  reports   report @relation(fields: [reportId], references: [reportId])
+  reportId  Int    @id
+  imageLink Int
 }
 
 model payment {
-  paymentId Int    @id @default(autoincrement())
-  journalNo Int    @unique
-  accountNo Int    @unique
-  bank      String
-  amount    Int
-  vehicleNo Int
+  paymentId   Int      @id @default(autoincrement())
+  journalNo   Int      @unique
+  accountNo   Int      @unique
+  bank        String
+  amount      Int
+  vehicle     vehicle  @relation(fields: [vehicleNo], references: [vehicleNo])
+  vehicleNo   Int
+  zone        zone     @relation(fields: [zoneId], references: [zoneId])
+  zoneId      Int
+  registering register @relation(fields: [registerId], references: [registerId])
+  registerId  Int
+}
+
+model vehicle {
+  vehicleNo Int         @id @default(autoincrement())
+  vehType   vehicleType @relation(fields: [typeId], references: [tyId])
+  typeId    Int
+  payment   payment[]
+  report    report[]
+}
+
+model vehicleType {
+  tyId     Int       @id @default(autoincrement())
+  vehicle  vehicle[]
+  vehicleT String
+  fee      fee[]
+}
+
+model register {
+  registerId Int       @id @default(autoincrement())
+  startTime  DateTime
+  endTime    DateTime
+  payment    payment[]
 }
